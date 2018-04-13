@@ -1,0 +1,64 @@
+apply plugin: 'com.android.application'
+
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        applicationId "com.yhcai.crosswalkdemo"
+        minSdkVersion 16
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("keystore_file.jks")
+            storePassword "android"
+            keyAlias "android"
+            keyPassword "android"
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            zipAlignEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+            if (null != outputFile && outputFile.getName().endsWith('.apk')) {
+                if (variant.buildType.getName().equals('release')) {
+                    outputFileName = "app_v${variant.versionName}_${releaseTime()}_release.apk"
+                } else if (variant.buildType.getName().equals('debug')) {
+                    outputFileName = "app_v${variant.versionName}_${releaseTime()}_debug.apk"
+                } else {
+                    outputFileName = "app_v${variant.versionName}__${releaseTime()}.apk"
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    implementation 'org.xwalk:xwalk_core_library:23.53.589.4'
+//    implementation 'org.xwalk:xwalk_shared_library:23.53.589.4'
+}
